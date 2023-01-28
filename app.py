@@ -17,7 +17,7 @@ def make_transfer(amount, from_currency, to_currency, recipient_info):
     # Code to send the converted amount to the recipient
     # ...
     print(converted_amount)
-    return 'Transfer complete', converted_amount
+    return f'Transfer complete from {recipient_info['name']} and {recipient_info}', converted_amount
 
 # Example usage
 transfer_amount = 100
