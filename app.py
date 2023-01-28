@@ -8,6 +8,7 @@ def convert_currency(amount, from_currency, to_currency):
     data = json.loads(response.text)
     exchange_rate = data['rates'][to_currency]
     converted_amount = amount * exchange_rate
+    print(converted_amount)
     return converted_amount
 
 # Function to make a money transfer
@@ -15,7 +16,8 @@ def make_transfer(amount, from_currency, to_currency, recipient_info):
     converted_amount = convert_currency(amount, from_currency, to_currency)
     # Code to send the converted amount to the recipient
     # ...
-    return 'Transfer complete'
+    print(converted_amount)
+    return 'Transfer complete', converted_amount
 
 # Example usage
 transfer_amount = 100
