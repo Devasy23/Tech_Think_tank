@@ -1,30 +1,66 @@
-import requests
+from tkinter import HORIZONTAL, OptionMenu
+import streamlit as st
+st.set_page_config(layout="wide")
+
+# with open("styles.css") as f:
+    # st.markdown('<style>{}</style>'.format(f.read()), unsafe_allow_html=True)
+
+import pyrebase
+import streamlit as st
+from datetime import datetime
 import json
+from firebase_admin import credentials,firestore
 
-# Function to convert currency
-def convert_currency(amount, from_currency, to_currency):
-    url = f'https://api.exchangerate-api.com/v4/latest/{from_currency}'
-    response = requests.get(url)
-    data = json.loads(response.text)
-    exchange_rate = data['rates'][to_currency]
-    converted_amount = amount * exchange_rate
-    print(converted_amount)
-    return converted_amount
+#Configuration Key
+firebaseConfig = {
+    'apiKey': "AIzaSyBSKjGpX9DMdnRxy_WwZBW3NpJcyySdtro",
+    'authDomain': "automated-inventory-ab4a2.firebaseapp.com",
+    'projectId': "automated-inventory-ab4a2",
+    'databaseURL': "https://automated-inventory-ab4a2-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    'storageBucket': "automated-inventory-ab4a2.appspot.com",
+    'messagingSenderId': "291072185162",
+    'appId': "1:291072185162:web:86222e93eb060524ada7b3"
+}
 
-# Function to make a money transfer
-def make_transfer(amount, from_currency, to_currency, recipient_info):
-    converted_amount = convert_currency(amount, from_currency, to_currency)
-    # Code to send the converted amount to the recipient
-    # ...
-    print(converted_amount)
-    name = recipient_info['name']
-    account_number = recipient_info['account_number']
-    return f'Transfer complete from {name}, account {account_number}', converted_amount
+#Firebase Authentication
+firebase = pyrebase.initialize_app(firebaseConfig)
+auth = firebase.auth()
 
-# Example usage
-transfer_amount = 100
-sender_currency = 'USD'
-recipient_currency = 'EUR'
-recipient_info = {'name': 'John Doe', 'account_number': '123456'}
-print(make_transfer(transfer_amount, sender_currency, recipient_currency, recipient_info))
-# Output: Transfer complete
+#Databases
+db = firebase.database()
+storage = firebase.storage()
+
+if 'key' not in st.session_state:
+    st.session_state['key'] = False
+if(st.session_state['key'] != True):
+
+    st.title("Welcome to Automated Inventory Management System!")
+    c1, c2, c3 = st.columns(3)
+    col1, col2, col3 = st.columns([1, 4, 1])
+    choice = st.selectbox("Login",["Login", "Signup"])
+    # choice = OptionMenu("Login",["Login", "Signup"])
+    if choice=='Signup':
+        email = st.text_input('Please enter your email id: ')
+        password = st.text_input('Please enter your password: ')
+        submit = st.sidebar.button('Create my Account')
+        if submit:
+            user = auth.create_user_with_email_and_password(email,password)
+            st.success('Your Account is created successfully!')
+            st.balloons()
+    if (choice == "Login"):
+        email = st.text_input('Please enter your email id: ')
+        password = st.text_input('Please enter your password: ')
+        if st.button("Login"):
+            try:
+                user = auth.sign_in_with_email_and_password(email,password)
+                st.session_state['key'] = True
+            except:
+                st.title("Invalid password entered")
+else:
+    st.title("Welcome")
+    db.update({
+        "Papercups": 5,
+        "Laptop": 1
+    })
+    users = db.child().get()
+    st.write(users.val())
